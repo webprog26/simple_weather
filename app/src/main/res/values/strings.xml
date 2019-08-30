@@ -1,3 +1,9 @@
 <resources>
     <string name="app_name">SimpleWeather</string>
+
+    <string name="on_location_permission_denied_message">
+        We are unable to show your weather forecast without knowing your location.
+        Please enable it and try again.
+    </string>
+
 </resources>
