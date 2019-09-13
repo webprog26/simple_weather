@@ -14,6 +14,7 @@ import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import com.rocket.simpleweather.ext_utils.toastLong
 import androidx.lifecycle.ViewModelProviders
+import com.rocket.simpleweather.weather_data.WeatherDataRepository
 import com.rocket.simpleweather.weather_data.WeatherViewModel
 
 class MainActivity : AppCompatActivity() {
@@ -25,11 +26,12 @@ class MainActivity : AppCompatActivity() {
 
     private val btnTest: Button by lazy { findViewById<Button>(R.id.btn_test) }
     private val tvCityName by lazy { findViewById<TextView>(R.id.tv_city_name) }
-    private val weatherModel by lazy { ViewModelProviders.of(this)[WeatherViewModel::class.java] }
+    private lateinit var weatherModel: WeatherViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+        weatherModel = ViewModelProviders.of(this)[WeatherViewModel::class.java]
         btnTest.isEnabled = false
         mFusedLocationProvider = LocationServices.getFusedLocationProviderClient(this)
 
@@ -106,8 +108,8 @@ class MainActivity : AppCompatActivity() {
             prefsStorage.saveCoordinates(latToString, lonToString)
         }
 
-       weatherModel.getWeatherData().observe(this, Observer {
-           Logger.log(it.toString())
+       weatherModel.currentWeather.observe(this, Observer {
+           Logger.log("observed: $it")
            tvCityName.text = it.cityName
        })
     }
