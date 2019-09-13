@@ -1,12 +1,19 @@
 package com.rocket.simpleweather.weather_data
 
+import androidx.room.Entity
+import androidx.room.PrimaryKey
 import com.google.gson.annotations.Expose
 import com.google.gson.annotations.SerializedName
 
+@Entity
 data class WeatherData (
+    @PrimaryKey
+    @SerializedName("id")
+    @Expose
+    val cityId: Long,
     @SerializedName("weather")
     @Expose
-    val weatherDescriptionDataList: ArrayList<WeatherDescriptionData>,
+    val weatherDescriptionDataList: List<WeatherDescriptionData>,
     @SerializedName("main")
     @Expose
     val mainWeatherData: MainWeatherData,
@@ -25,9 +32,6 @@ data class WeatherData (
     @SerializedName("timezone")
     @Expose
     val timezone: Long,
-    @SerializedName("id")
-    @Expose
-    val cityId: Long,
     @SerializedName("name")
     @Expose
     val cityName: String

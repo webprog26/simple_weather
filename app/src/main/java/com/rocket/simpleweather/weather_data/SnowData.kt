@@ -3,6 +3,7 @@ package com.rocket.simpleweather.weather_data
 import com.google.gson.annotations.Expose
 import com.google.gson.annotations.SerializedName
 
+
 data class SnowData (
     @SerializedName("1h")
     @Expose

@@ -3,6 +3,7 @@ package com.rocket.simpleweather.weather_data
 import com.google.gson.annotations.Expose
 import com.google.gson.annotations.SerializedName
 
+
 data class WeatherSysData (
     @SerializedName("country")
     @Expose
@@ -12,5 +13,5 @@ data class WeatherSysData (
     val sunriseTime: Long,
     @SerializedName("sunset")
     @Expose
-    val sunsetTme: Long
+    val sunsetTime: Long
 )
