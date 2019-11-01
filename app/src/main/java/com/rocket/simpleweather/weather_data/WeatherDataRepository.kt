@@ -2,9 +2,7 @@ package com.rocket.simpleweather.weather_data
 
 import android.os.AsyncTask
 import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.room.Room
-import androidx.room.RoomDatabase
 import com.rocket.simpleweather.App
 import com.rocket.simpleweather.Logger
 import com.rocket.simpleweather.PreferencesStorage
@@ -15,6 +13,8 @@ import com.rocket.simpleweather.weather_data.weaher_db.WeatherDatabase
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
+import java.text.SimpleDateFormat
+import java.util.*
 
 object WeatherDataRepository {
 
@@ -23,12 +23,13 @@ object WeatherDataRepository {
         WeatherDatabase::class.java, "weather.db"
     ).build()
 
-    fun getWeatherData(): LiveData<WeatherData> {
-        refeshWeatherForecast()
+    fun getWeatherData(): LiveData<WeatherData?> {
+        Logger.log("getWeatherData")
+        refreshWeatherForecast()
         return dataBase.getWeatherDao().load()
     }
 
-     fun refeshWeatherForecast() {
+     private fun refreshWeatherForecast() {
         val prefsStorage = PreferencesStorage
         val lat = prefsStorage.getLat()
         val lon = prefsStorage.getLon()
@@ -49,6 +50,11 @@ object WeatherDataRepository {
                         Logger.log("response code is " + response.code())
                         val data = response.body()
                         if (data != null) {
+                            val calendar = Calendar.getInstance()
+                            calendar.timeZone = TimeZone.getDefault()
+                            calendar.timeInMillis = System.currentTimeMillis()
+                            data.timeUpdated =  SimpleDateFormat("HH:mm",
+                                Locale.getDefault()).format(calendar.time)
                             Logger.log("response body: $data")
                             PushWeatherDataTask(dataBase.getWeatherDao()).execute(data)
 //                            dataBase.getWeatherDao().save(data)

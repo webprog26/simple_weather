@@ -31,8 +31,9 @@ data class WeatherData (
     val sysData: WeatherSysData,
     @SerializedName("timezone")
     @Expose
-    val timezone: Long,
+    val timezone: Int,
     @SerializedName("name")
     @Expose
-    val cityName: String
+    val cityName: String,
+    var timeUpdated: String
 )

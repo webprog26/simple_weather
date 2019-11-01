@@ -12,5 +12,11 @@ data class MainWeatherData (
     val pressure: Double,
     @SerializedName("humidity")
     @Expose
-    val humidity: Int
+    val humidity: Int,
+    @SerializedName("temp_min")
+    @Expose
+    val temp_min: Double,
+    @SerializedName("temp_max")
+    @Expose
+    val temp_max: Double
 )

@@ -14,6 +14,10 @@ import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import com.rocket.simpleweather.ext_utils.toastLong
 import androidx.lifecycle.ViewModelProviders
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
+import com.rocket.simpleweather.leafs.*
+import com.rocket.simpleweather.weather_data.WeatherData
 import com.rocket.simpleweather.weather_data.WeatherDataRepository
 import com.rocket.simpleweather.weather_data.WeatherViewModel
 
@@ -24,24 +28,33 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var mFusedLocationProvider: FusedLocationProviderClient
 
-    private val btnTest: Button by lazy { findViewById<Button>(R.id.btn_test) }
-    private val tvCityName by lazy { findViewById<TextView>(R.id.tv_city_name) }
+    private val rvCards by lazy { findViewById<RecyclerView>(R.id.rv_cards) }
+    private val adapter by lazy { WeatherAdapter(emptyList<AbstractWeatherLeaf>()) }
     private lateinit var weatherModel: WeatherViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        Logger.log("onCreate")
         setContentView(R.layout.activity_main)
         weatherModel = ViewModelProviders.of(this)[WeatherViewModel::class.java]
-        btnTest.isEnabled = false
         mFusedLocationProvider = LocationServices.getFusedLocationProviderClient(this)
+        rvCards.layoutManager = LinearLayoutManager(this)
+        rvCards.adapter = adapter
+    }
 
+    override fun onResume() {
+        super.onResume()
+        Logger.log("onResume")
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION)
-                != PackageManager.PERMISSION_GRANTED) {
+                != PackageManager.PERMISSION_GRANTED
+            ) {
 
-                ActivityCompat.requestPermissions(this,
+                ActivityCompat.requestPermissions(
+                    this,
                     arrayOf(android.Manifest.permission.ACCESS_COARSE_LOCATION),
-                    ACCESS_COARSE_LOCATION_PERMISSION_REQUEST_CODE)
+                    ACCESS_COARSE_LOCATION_PERMISSION_REQUEST_CODE
+                )
 
             } else {
                 initLocationFetching()
@@ -51,9 +64,11 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    override fun onRequestPermissionsResult(requestCode: Int,
-                                            permissions: Array<out String>,
-                                            grantResults: IntArray) {
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
 
         when (requestCode) {
@@ -61,7 +76,7 @@ class MainActivity : AppCompatActivity() {
                 if ((grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED)) {
                     initLocationFetching()
                 } else {
-                   toastLong(getString(R.string.on_location_permission_denied_message))
+                    toastLong(getString(R.string.on_location_permission_denied_message))
                 }
                 return
             }
@@ -76,15 +91,18 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun initLocationFetching() {
+        Logger.log("initLocationFetching")
         try {
             mFusedLocationProvider.lastLocation
                 .addOnSuccessListener { location: Location? ->
-                   when (location != null) {
+                    when (location != null) {
 
                         true -> proceedWithLocation(location)
                         false -> toastLong(getString(R.string.on_location_permission_denied_message))
 
                     }
+                }.addOnFailureListener{
+                    it.printStackTrace()
                 }
         } catch (e: SecurityException) {
             e.printStackTrace()
@@ -92,11 +110,12 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun proceedWithLocation(location: Location) {
+        Logger.log("proceedWithLocation()")
 
         val prefsStorage = PreferencesStorage
 
-        val latToString = location.latitude.toString()
-        val lonToString = location.longitude.toString()
+        val latToString = location.latitude.toString().substring(0, 6)
+        val lonToString = location.longitude.toString().substring(0, 6)
 
         val lastKnownLat = prefsStorage.getLat()
         val lastKnownLon = prefsStorage.getLon()
@@ -108,9 +127,19 @@ class MainActivity : AppCompatActivity() {
             prefsStorage.saveCoordinates(latToString, lonToString)
         }
 
-       weatherModel.currentWeather.observe(this, Observer {
-           Logger.log("observed: $it")
-           tvCityName.text = it.cityName
-       })
+        weatherModel.getWeatherData().observe(this, Observer {
+            Logger.log("observed: $it")
+            if (it != null) {
+                val leafs = arrayListOf(
+                    MainWeatherLeaf(it),
+                    ComfortLevelLeaf(it),
+                    WindWeatherLeaf(it),
+                    SunDataWeatherLeaf(it)
+                )
+                adapter.updateWithWeargerData(leafs)
+            } else {
+                Logger.log("weather data is null")
+            }
+        })
     }
 }

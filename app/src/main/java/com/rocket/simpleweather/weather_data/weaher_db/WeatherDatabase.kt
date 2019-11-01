@@ -8,7 +8,7 @@ import androidx.room.TypeConverters
 import com.rocket.simpleweather.weather_data.WeatherData
 import com.rocket.simpleweather.weather_data.weaher_db.type_converters.WeatherDataTypeConverter
 
-@Database(entities = [WeatherData::class], version = 1)
+@Database(entities = [WeatherData::class], version = 1, exportSchema = false)
 @TypeConverters(WeatherDataTypeConverter::class)
 abstract class WeatherDatabase : RoomDatabase() {
     abstract fun getWeatherDao(): WeatherDao
