@@ -1,6 +1,7 @@
 package com.rocket.simpleweather.weather_data.weaher_db.type_converters
 
 import androidx.room.TypeConverter
+import com.rocket.simpleweather.Logger
 import com.rocket.simpleweather.weather_data.*
 import org.json.JSONArray
 import org.json.JSONObject
@@ -13,6 +14,8 @@ private const val WEATHER_DESCRIPTION_DATA_ICON = "icon"
 private const val MAIN_WEATHER_DATA_TEMP = "temp"
 private const val MAIN_WEATHER_DATA_PRESSURE = "pressure"
 private const val MAIN_WEATHER_DATA_HUMIDITY = "humidity"
+private const val MAIN_WEATHER_DATA_TEMP_MIN = "temp_min"
+private const val MAIN_WEATHER_DATA_TEMP_MAX = "temp_max"
 
 private const val WIND_DATA_SPEED = "speed"
 private const val WIND_DATA_DIRECTION = "direction"
@@ -47,9 +50,7 @@ class WeatherDataTypeConverter {
     fun fromStringToList(jsonString: String): List<WeatherDescriptionData> {
         val dataList = ArrayList<WeatherDescriptionData>()
         val jsonArray = JSONArray(jsonString)
-
-        for (i in 0 until (jsonArray.length() - 1)) {
-            val dataJSONObject = jsonArray[i] as? JSONObject
+            val dataJSONObject = jsonArray[0] as? JSONObject
             if (dataJSONObject != null) {
                 val data = WeatherDescriptionData(
                     dataJSONObject.getInt(WEATHER_DESCRIPTION_DATA_ID),
@@ -59,7 +60,6 @@ class WeatherDataTypeConverter {
                 )
                 dataList.add(data)
             }
-        }
         return dataList
     }
 
@@ -70,6 +70,8 @@ class WeatherDataTypeConverter {
         jsonObject.put(MAIN_WEATHER_DATA_TEMP, data.temp)
         jsonObject.put(MAIN_WEATHER_DATA_PRESSURE, data.pressure)
         jsonObject.put(MAIN_WEATHER_DATA_HUMIDITY, data.humidity)
+        jsonObject.put(MAIN_WEATHER_DATA_TEMP_MIN, data.temp_min)
+        jsonObject.put(MAIN_WEATHER_DATA_TEMP_MAX, data.temp_max)
         return jsonObject.toString()
     }
 
@@ -79,7 +81,9 @@ class WeatherDataTypeConverter {
         return MainWeatherData(
             jsonObject.getDouble(MAIN_WEATHER_DATA_TEMP),
             jsonObject.getDouble(MAIN_WEATHER_DATA_PRESSURE),
-            jsonObject.getInt(MAIN_WEATHER_DATA_HUMIDITY))
+            jsonObject.getInt(MAIN_WEATHER_DATA_HUMIDITY),
+            jsonObject.getDouble(MAIN_WEATHER_DATA_TEMP_MIN),
+            jsonObject.getDouble(MAIN_WEATHER_DATA_TEMP_MAX))
     }
 
     @TypeConverter

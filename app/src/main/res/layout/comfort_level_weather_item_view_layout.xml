@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<merge xmlns:android="http://schemas.android.com/apk/res/android" xmlns:tools="http://schemas.android.com/tools"
+       tools:parentTag="android.widget.RelativeLayout"
+       android:layout_width="match_parent"
+       android:layout_height="match_parent">
+
+    <include layout="@layout/card_title_layout"/>
+
+    <TextView
+            android:id="@+id/tv_humidity"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="14sp"
+            android:textColor="@android:color/black"
+            android:layout_below="@id/tv_card_title"/>
+
+    <ProgressBar
+            android:id="@+id/pb_humidity"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            style="?android:attr/progressBarStyleHorizontal"
+            android:layout_below="@id/tv_humidity"
+            android:layout_marginTop="10dp"
+            tools:progress="60"/>
+
+    <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="14sp"
+            android:layout_below="@id/pb_humidity"
+            android:layout_alignParentStart="true"
+            android:text="0"/>
+
+    <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="14sp"
+            android:layout_below="@id/pb_humidity"
+            android:layout_alignParentEnd="true"
+            android:text="100"/>
+
+    <TextView
+            android:id="@+id/tv_pressure"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="14sp"
+            android:textColor="@android:color/black"
+            android:layout_below="@id/pb_humidity"
+            android:layout_marginTop="24dp"/>
+
+</merge>

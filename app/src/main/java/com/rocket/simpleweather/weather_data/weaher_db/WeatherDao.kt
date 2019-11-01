@@ -11,6 +11,6 @@ interface WeatherDao {
     fun save(data: WeatherData)
 
     @Query("SELECT * FROM weatherdata")
-    fun load(): LiveData<WeatherData>
+    fun load(): LiveData<WeatherData?>
 
 }

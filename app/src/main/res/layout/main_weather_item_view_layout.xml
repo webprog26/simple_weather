@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<merge xmlns:android="http://schemas.android.com/apk/res/android" xmlns:tools="http://schemas.android.com/tools"
+       tools:parentTag="android.widget.RelativeLayout"
+       android:layout_width="match_parent"
+       android:layout_height="match_parent">
+
+    <TextView
+            android:id="@+id/tv_temp_current"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            tools:text="16"
+            android:textSize="38sp"
+            android:textColor="@android:color/black"
+            android:gravity="center_horizontal"/>
+
+    <TextView
+            android:id="@+id/tv_city_name"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            tools:text="Kirovohrad"
+            android:textSize="24sp"
+            android:textColor="@android:color/black"
+            android:layout_below="@id/tv_temp_current"
+            android:gravity="center_horizontal"
+            android:layout_marginTop="10dp"/>
+
+    <TextView
+            android:id="@+id/tv_temp_min_and_max"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            tools:text="12/12"
+            android:textSize="24sp"
+            android:textColor="@android:color/black"
+            android:layout_below="@id/tv_city_name"
+            android:gravity="center_horizontal"
+            android:layout_marginTop="10dp"/>
+
+    <TextView
+            android:id="@+id/tv_main_description"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            tools:text="Rain"
+            android:textSize="24sp"
+            android:textColor="@android:color/black"
+            android:layout_below="@id/tv_temp_min_and_max"
+            android:gravity="center_horizontal"
+            android:layout_marginTop="10dp"/>
+
+
+    <ImageView
+            android:id="@+id/iv_weather_icon"
+            android:layout_width="56dp"
+            android:layout_height="56dp"
+            tools:src="@mipmap/ic_launcher"
+            android:layout_centerHorizontal="true"
+            android:layout_below="@id/tv_main_description"
+            android:scaleType="centerCrop"/>
+
+    <TextView
+            android:id="@+id/tv_last_updated"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            tools:text="Last updated: 15:36"
+            android:textColor="@android:color/black"
+            android:textSize="15sp"
+            android:layout_below="@id/iv_weather_icon"
+            android:layout_centerHorizontal="true"
+            android:gravity="center_horizontal"
+            android:layout_marginTop="8dp"/>
+
+</merge>
