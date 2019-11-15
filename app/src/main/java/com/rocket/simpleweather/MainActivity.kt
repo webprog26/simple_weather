@@ -4,8 +4,6 @@ import android.content.pm.PackageManager
 import android.location.Location
 import android.os.Build
 import android.os.Bundle
-import android.widget.Button
-import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
@@ -17,8 +15,6 @@ import androidx.lifecycle.ViewModelProviders
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.rocket.simpleweather.leafs.*
-import com.rocket.simpleweather.weather_data.WeatherData
-import com.rocket.simpleweather.weather_data.WeatherDataRepository
 import com.rocket.simpleweather.weather_data.WeatherViewModel
 
 class MainActivity : AppCompatActivity() {
@@ -40,15 +36,10 @@ class MainActivity : AppCompatActivity() {
         mFusedLocationProvider = LocationServices.getFusedLocationProviderClient(this)
         rvCards.layoutManager = LinearLayoutManager(this)
         rvCards.adapter = adapter
-    }
-
-    override fun onResume() {
-        super.onResume()
-        Logger.log("onResume")
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION)
-                != PackageManager.PERMISSION_GRANTED
-            ) {
+            if (ContextCompat.checkSelfPermission(this,
+                    android.Manifest.permission.ACCESS_COARSE_LOCATION)
+                != PackageManager.PERMISSION_GRANTED) {
 
                 ActivityCompat.requestPermissions(
                     this,
@@ -61,6 +52,23 @@ class MainActivity : AppCompatActivity() {
             }
         } else {
             initLocationFetching()
+        }
+    }
+
+    override fun onRestart() {
+        super.onRestart()
+        Logger.log("onRestart")
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            if (ContextCompat.checkSelfPermission(this,
+                    android.Manifest.permission.ACCESS_COARSE_LOCATION)
+                != PackageManager.PERMISSION_GRANTED) {
+
+                ActivityCompat.requestPermissions(
+                    this,
+                    arrayOf(android.Manifest.permission.ACCESS_COARSE_LOCATION),
+                    ACCESS_COARSE_LOCATION_PERMISSION_REQUEST_CODE
+                )
+            }
         }
     }
 
@@ -127,7 +135,7 @@ class MainActivity : AppCompatActivity() {
             prefsStorage.saveCoordinates(latToString, lonToString)
         }
 
-        weatherModel.getWeatherData().observe(this, Observer {
+        weatherModel.updateWeatherData().observe(this, Observer {
             Logger.log("observed: $it")
             if (it != null) {
                 val leafs = arrayListOf(

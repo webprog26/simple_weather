@@ -1,15 +1,17 @@
 package com.rocket.simpleweather.weather_data
 
-import android.os.AsyncTask
-import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import androidx.room.Room
 import com.rocket.simpleweather.App
 import com.rocket.simpleweather.Logger
 import com.rocket.simpleweather.PreferencesStorage
 import com.rocket.simpleweather.R
 import com.rocket.simpleweather.network.WeatherNetworkService
-import com.rocket.simpleweather.weather_data.weaher_db.WeatherDao
 import com.rocket.simpleweather.weather_data.weaher_db.WeatherDatabase
+import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.disposables.CompositeDisposable
+import io.reactivex.functions.Consumer
+import io.reactivex.schedulers.Schedulers
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -18,22 +20,31 @@ import java.util.*
 
 object WeatherDataRepository {
 
+    private val disposable = CompositeDisposable()
+
+
     private val dataBase: WeatherDatabase = Room.databaseBuilder(
         App.instance,
         WeatherDatabase::class.java, "weather.db"
     ).build()
 
-    fun getWeatherData(): LiveData<WeatherData?> {
-        Logger.log("getWeatherData")
-        refreshWeatherForecast()
-        return dataBase.getWeatherDao().load()
+    fun updateWeatherData(weatherData: MutableLiveData<WeatherData>) {
+        Logger.log("updateWeatherData")
+        refreshWeatherForecast(weatherData)
     }
 
-     private fun refreshWeatherForecast() {
+     private fun refreshWeatherForecast(weatherData: MutableLiveData<WeatherData>) {
         val prefsStorage = PreferencesStorage
         val lat = prefsStorage.getLat()
         val lon = prefsStorage.getLon()
         if (lat != null && lon != null) {
+            disposable.add(dataBase.getWeatherDao().load()
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(Consumer {
+                    Logger.log("loaded from the database")
+                    weatherData.value = it
+                }))
             WeatherNetworkService
                 .getCurrentWeatherDataApi()
                 .getCurrentWeatherData(
@@ -56,26 +67,20 @@ object WeatherDataRepository {
                             data.timeUpdated =  SimpleDateFormat("HH:mm",
                                 Locale.getDefault()).format(calendar.time)
                             Logger.log("response body: $data")
-                            PushWeatherDataTask(dataBase.getWeatherDao()).execute(data)
-//                            dataBase.getWeatherDao().save(data)
+                            disposable.add(dataBase.getWeatherDao().save(data)
+                                .subscribeOn(Schedulers.io())
+                                .observeOn(AndroidSchedulers.mainThread())
+                                .subscribe {
+                                    Logger.log("saved to the database")
+                                    weatherData.value = data
+                                })
                         }
                     }
                 })
         }
     }
 
-    class PushWeatherDataTask(val dao: WeatherDao): AsyncTask<WeatherData, Unit, Unit>() {
-
-        override fun doInBackground(vararg params: WeatherData?) {
-            val data = params[0]
-            if (data != null) {
-                dao.save(data)
-            }
-        }
-
-        override fun onPostExecute(result: Unit?) {
-            super.onPostExecute(result)
-            Logger.log("data saved")
-        }
+    fun onCleared() {
+        disposable.clear()
     }
 }
