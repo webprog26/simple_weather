@@ -1,11 +1,19 @@
 package com.rocket.simpleweather.weather_data
 
-import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 
 class WeatherViewModel: ViewModel() {
 
-    fun getWeatherData(): LiveData<WeatherData?> {
-        return  WeatherDataRepository.getWeatherData()
+    private val weatherData = MutableLiveData<WeatherData>()
+
+    fun updateWeatherData(): MutableLiveData<WeatherData> {
+        WeatherDataRepository.updateWeatherData(weatherData)
+        return weatherData
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        WeatherDataRepository.onCleared()
     }
 }
