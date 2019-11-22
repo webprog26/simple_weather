@@ -14,19 +14,21 @@ import com.rocket.simpleweather.ext_utils.toastLong
 import androidx.lifecycle.ViewModelProviders
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.rocket.simpleweather.leafs.*
 import com.rocket.simpleweather.weather_data.WeatherViewModel
 
+const val ACCESS_COARSE_LOCATION_PERMISSION_REQUEST_CODE = 0
+
 class MainActivity : AppCompatActivity() {
-
-    private val ACCESS_COARSE_LOCATION_PERMISSION_REQUEST_CODE = 0
-
 
     private lateinit var mFusedLocationProvider: FusedLocationProviderClient
 
     private val rvCards by lazy { findViewById<RecyclerView>(R.id.rv_cards) }
     private val adapter by lazy { WeatherAdapter(emptyList<AbstractWeatherLeaf>()) }
     private lateinit var weatherModel: WeatherViewModel
+
+    private val swipeToRefreshContainer by lazy { findViewById<SwipeRefreshLayout>(R.id.srl_container) }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -36,23 +38,18 @@ class MainActivity : AppCompatActivity() {
         mFusedLocationProvider = LocationServices.getFusedLocationProviderClient(this)
         rvCards.layoutManager = LinearLayoutManager(this)
         rvCards.adapter = adapter
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            if (ContextCompat.checkSelfPermission(this,
-                    android.Manifest.permission.ACCESS_COARSE_LOCATION)
-                != PackageManager.PERMISSION_GRANTED) {
 
-                ActivityCompat.requestPermissions(
-                    this,
-                    arrayOf(android.Manifest.permission.ACCESS_COARSE_LOCATION),
-                    ACCESS_COARSE_LOCATION_PERMISSION_REQUEST_CODE
-                )
+        swipeToRefreshContainer.setColorSchemeResources(
+            android.R.color.holo_green_dark,
+            android.R.color.holo_blue_bright,
+            android.R.color.holo_orange_light,
+            android.R.color.holo_red_light)
 
-            } else {
-                initLocationFetching()
-            }
-        } else {
-            initLocationFetching()
+        swipeToRefreshContainer.setOnRefreshListener {
+            checkLocationPermissionIfNeededAndProceed()
         }
+
+        checkLocationPermissionIfNeededAndProceed()
     }
 
     override fun onRestart() {
@@ -96,6 +93,26 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
+    }
+
+    private fun checkLocationPermissionIfNeededAndProceed() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            if (ContextCompat.checkSelfPermission(this,
+                    android.Manifest.permission.ACCESS_COARSE_LOCATION)
+                != PackageManager.PERMISSION_GRANTED) {
+
+                ActivityCompat.requestPermissions(
+                    this,
+                    arrayOf(android.Manifest.permission.ACCESS_COARSE_LOCATION),
+                    ACCESS_COARSE_LOCATION_PERMISSION_REQUEST_CODE
+                )
+
+            } else {
+                initLocationFetching()
+            }
+        } else {
+            initLocationFetching()
+        }
     }
 
     private fun initLocationFetching() {
@@ -145,6 +162,7 @@ class MainActivity : AppCompatActivity() {
                     SunDataWeatherLeaf(it)
                 )
                 adapter.updateWithWeargerData(leafs)
+                swipeToRefreshContainer.isRefreshing = !swipeToRefreshContainer.isRefreshing
             } else {
                 Logger.log("weather data is null")
             }
